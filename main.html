@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог обложек</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1c1d20; --panel:#232529; --panel-2:#2b2d32; --line:#383a40;
+  --text:#ebe8e2; --mute:#9b9a96; --accent:#f2c94c; --accent-ink:#1d1700; --danger:#ff7468;
+  --card:260px;
+  font-family:'Golos Text',system-ui,'Segoe UI',Roboto,Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-size:14px;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+#app{display:grid;grid-template-columns:288px 1fr;min-height:100%}
+
+/* ---------- боковая панель ---------- */
+#side{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 16px 40px}
+#side h1{font-size:18px;margin:0 0 2px;font-weight:700}
+#side .sub{color:var(--mute);margin:0 0 18px;font-size:13px}
+.group{margin:0 0 22px}
+.group > h2{font-size:13px;font-weight:700;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline;color:var(--text)}
+.group > h2 small{font-weight:400;color:var(--mute)}
+.seg{display:flex;background:var(--bg);border-radius:6px;padding:2px;gap:2px}
+.seg button{flex:1;border:0;background:none;padding:5px 6px;border-radius:5px;color:var(--mute)}
+.seg button[aria-pressed=true]{background:var(--panel-2);color:var(--text)}
+.field{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+.field::placeholder{color:#76756f}
+.rows{display:flex;flex-direction:column;gap:1px;max-height:260px;overflow-y:auto;margin-top:8px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center;width:100%;text-align:left;background:none;border:0;border-radius:5px;padding:5px 8px;color:var(--text)}
+.row:hover{background:var(--panel-2)}
+.row .n{color:var(--mute);font-variant-numeric:tabular-nums}
+.row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row.in{background:var(--accent);color:var(--accent-ink)}
+.row.in .n{color:var(--accent-ink)}
+.row.out{color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger)}
+.row.out .t{text-decoration:line-through}
+.row .edit{opacity:0;border:0;background:none;color:var(--mute);padding:0 4px}
+.row:hover .edit{opacity:1}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border:1px solid var(--line);background:none;border-radius:99px;padding:3px 10px;color:var(--mute);font-size:13px}
+.chip:hover{color:var(--text);border-color:var(--mute)}
+.hint{color:var(--mute);font-size:12px;margin:6px 0 0}
+.linkbtn{background:none;border:0;color:var(--mute);text-decoration:underline;padding:0}
+.linkbtn:hover{color:var(--text)}
+
+/* ---------- основная часть ---------- */
+main{min-width:0;padding:0 24px 120px}
+#top{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:10px;align-items:center;padding:16px 0 14px;flex-wrap:wrap}
+#top .grow{flex:1;min-width:200px}
+#top .field{padding:9px 12px}
+#top select.field{width:auto}
+#top label.size{display:flex;align-items:center;gap:8px;color:var(--mute)}
+#top input[type=range]{accent-color:var(--accent);width:90px}
+.btn{border:1px solid var(--line);background:var(--panel-2);border-radius:6px;padding:8px 14px}
+.btn:hover{border-color:var(--mute)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.danger{color:var(--danger)}
+#filterToggle{display:none}
+#count{color:var(--mute);margin:0 0 14px}
+
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--card),1fr));gap:22px 12px}
+.card{position:relative;cursor:pointer;min-width:0}
+.thumb{position:relative;aspect-ratio:16/9;border-radius:7px;overflow:hidden;background:var(--panel-2)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.card.sel .thumb{outline:3px solid var(--accent);outline-offset:2px}
+.badge{position:absolute;background:rgba(10,10,12,.82);color:#fff;border-radius:4px;padding:1px 6px;font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+.badge.views{left:6px;bottom:6px}
+.badge.dur{right:6px;bottom:6px}
+.badge.out{right:6px;top:6px;background:var(--accent);color:var(--accent-ink);font-weight:700}
+.badge.short{left:6px;top:6px}
+.pick{position:absolute;left:6px;top:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:rgba(10,10,12,.5);color:var(--accent-ink);font-weight:700;display:grid;place-items:center;opacity:0;transition:opacity .12s;padding:0;line-height:1}
+.card:hover .pick,.card.sel .pick,.selecting .pick{opacity:1}
+.card.sel .pick{background:var(--accent);border-color:var(--accent)}
+.card .badge.short{left:36px}
+.title{margin:8px 0 0;font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px}
+.meta{color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag{font-size:12px;color:var(--text);background:var(--panel-2);border-radius:4px;padding:1px 7px}
+.tag.more{color:var(--mute);background:none}
+#sentinel{height:1px}
+.acts{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s}
+.card:hover .acts,.card:focus-within .acts{opacity:1}
+.act{width:30px;height:28px;border:0;border-radius:5px;background:rgba(10,10,12,.82);color:#fff;font-size:15px;line-height:1;padding:0}
+.act:hover,.act.on{background:var(--accent);color:var(--accent-ink)}
+.badge.saved{left:36px;top:6px;background:var(--accent);color:var(--accent-ink);font-weight:700}
+.card.isSaved .badge.short{left:66px}
+@media (hover:none){.acts,.pick{opacity:1}}
+
+.empty{max-width:440px;margin:12vh auto;text-align:center;color:var(--mute)}
+.empty h2{color:var(--text);margin:0 0 8px;font-size:20px}
+.empty .btn{margin-top:14px}
+
+/* ---------- панель выбора ---------- */
+#selbar{position:fixed;left:calc(288px + (100vw - 288px)/2);transform:translateX(-50%);bottom:20px;z-index:10;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:calc(100vw - 24px)}
+#selbar .field{width:190px;padding:7px 10px}
+#selbar .count{font-weight:700;padding:0 6px}
+
+/* ---------- диалоги ---------- */
+dialog{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:0;max-width:calc(100vw - 24px)}
+dialog::backdrop{background:rgba(8,8,10,.78)}
+#viewer{width:min(1280px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+.vwrap{display:grid;grid-template-columns:1fr 340px;max-height:calc(100vh - 26px)}
+.vimg{position:relative;background:#000;display:grid;place-items:center;min-height:240px}
+.vimg img{max-width:100%;max-height:calc(100vh - 26px);display:block}
+.nav{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(10,10,12,.6);color:#fff;width:42px;height:64px;font-size:22px;border-radius:6px}
+.nav.prev{left:8px}.nav.next{right:8px}
+.nav:hover{background:rgba(10,10,12,.9)}
+.vside{padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.vside h2{margin:0;font-size:17px;line-height:1.3}
+.vside a{color:var(--text)}
+.vmeta{color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 14px}
+.vmeta b{color:var(--text);font-weight:500}
+.vtags{display:flex;flex-wrap:wrap;gap:6px}
+.vtags .tag{display:inline-flex;gap:6px;align-items:center;padding:3px 6px 3px 9px;font-size:13px}
+.vtags .tag button{border:0;background:none;color:var(--mute);padding:0 2px}
+.vtags .tag button:hover{color:var(--danger)}
+.stars{display:flex;gap:2px}
+.stars button{border:0;background:none;font-size:22px;color:var(--line);padding:0 1px}
+.stars button.on{color:var(--accent)}
+textarea.field{min-height:90px;resize:vertical}
+.vactions{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+.xbtn{position:absolute;right:10px;top:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:rgba(10,10,12,.65);color:#fff;font-size:18px}
+
+#importer{width:min(560px,calc(100vw - 24px))}
+.imp{padding:20px;display:flex;flex-direction:column;gap:14px}
+.imp h2{margin:0;font-size:18px}
+.imp .opts{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.imp label{display:flex;gap:6px;align-items:center}
+.imp input[type=number]{width:80px}
+.imp input[type=radio],.imp input[type=checkbox]{accent-color:var(--accent)}
+progress{width:100%;height:8px;accent-color:var(--accent)}
+#impLog{background:var(--bg);border-radius:6px;padding:10px;min-height:96px;max-height:200px;overflow-y:auto;font-size:13px;color:var(--mute);white-space:pre-wrap;margin:0}
+.imp .actions{display:flex;gap:8px;justify-content:flex-end}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:8px;z-index:50;font-weight:500;max-width:90vw}
+
+@media (max-width:860px){
+  #app{grid-template-columns:1fr}
+  #side{position:fixed;left:0;top:0;bottom:0;width:min(320px,88vw);z-index:20;transform:translateX(-100%);transition:transform .18s}
+  body.filters-open #side{transform:none;box-shadow:0 0 0 100vmax rgba(8,8,10,.7)}
+  #filterToggle{display:inline-block}
+  main{padding:0 14px 120px}
+  #selbar{left:50%}
+  .vwrap{grid-template-columns:1fr;overflow-y:auto}
+  .vimg img{max-height:50vh}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.steps{margin:0 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.drop{border:1px dashed var(--line);border-radius:8px;padding:16px;text-align:center;color:var(--mute)}
+.drop.over{border-color:var(--accent);color:var(--text)}
+.imp h3{margin:0;font-size:14px}
+.imp section{display:flex;flex-direction:column;gap:8px}
+.imp p{margin:0}
+.warn{color:var(--accent)}
+#baseDlg{width:min(560px,calc(100vw - 24px))}
+.status{margin:22px 0 0;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side" aria-label="Фильтры">
+    <h1>Каталог обложек</h1>
+    <p class="sub" id="libInfo">Загружаю…</p>
+    <section class="group" aria-label="Что показывать">
+      <div class="rows" id="viewRows" style="max-height:none;margin-top:0"></div>
+    </section>
+
+    <section class="group">
+      <h2>Теги <small id="tagMeta"></small></h2>
+      <div class="seg" id="tagMode" role="group" aria-label="Режим тегов">
+        <button type="button" data-mode="all" aria-pressed="true">Все выбранные</button>
+        <button type="button" data-mode="any" aria-pressed="false">Любой из</button>
+      </div>
+      <input class="field" id="tagSearch" type="search" placeholder="Найти тег" style="margin-top:8px">
+      <div class="rows" id="tagRows"></div>
+      <p class="hint">Клик включает тег, второй клик исключает, третий снимает.</p>
+    </section>
+
+    <section class="group">
+      <h2>Просмотры</h2>
+      <div class="pair">
+        <input class="field" id="minV" type="number" min="0" placeholder="от">
+        <input class="field" id="maxV" type="number" min="0" placeholder="до">
+      </div>
+      <div class="chips" id="viewPresets">
+        <button type="button" class="chip" data-min="10000">от 10 тыс.</button>
+        <button type="button" class="chip" data-min="100000">от 100 тыс.</button>
+        <button type="button" class="chip" data-min="1000000">от 1 млн</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>Лучше среднего по каналу</h2>
+      <div class="seg" id="outlier" role="group">
+        <button type="button" data-v="0" aria-pressed="true">Любые</button>
+        <button type="button" data-v="1.5" aria-pressed="false">×1,5</button>
+        <button type="button" data-v="2" aria-pressed="false">×2</button>
+        <button type="button" data-v="3" aria-pressed="false">×3</button>
+        <button type="button" data-v="5" aria-pressed="false">×5</button>
+      </div>
+      <p class="hint">Просмотры делятся на медиану канала. Считается для каналов, у которых в каталоге от 5 видео.</p>
+    </section>
+
+    <section class="group">
+      <h2>Формат</h2>
+      <div class="seg" id="kind" role="group">
+        <button type="button" data-v="" aria-pressed="true">Все</button>
+        <button type="button" data-v="video" aria-pressed="false">Видео</button>
+        <button type="button" data-v="short" aria-pressed="false">Шортсы</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>Оценка</h2>
+      <div class="seg" id="rating" role="group">
+        <button type="button" data-v="0" aria-pressed="true">Любая</button>
+        <button type="button" data-v="3" aria-pressed="false">3+</button>
+        <button type="button" data-v="4" aria-pressed="false">4+</button>
+        <button type="button" data-v="5" aria-pressed="false">5</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>Каналы <small id="chanMeta"></small></h2>
+      <input class="field" id="chanSearch" type="search" placeholder="Найти канал">
+      <div class="rows" id="chanRows"></div>
+    </section>
+
+    <button type="button" class="linkbtn" id="resetAll">Сбросить все фильтры</button>
+
+    <section class="group status">
+      <button type="button" class="row" id="extRow" title="Установка и настройка расширения"><span class="t" id="extText">Расширение не установлено</span></button>
+      <p class="hint" id="backupLine"></p>
+      <p class="hint warn" id="storageWarn" hidden>Хранилище браузера недоступно, данные не сохранятся. Скачивай копию базы.</p>
+    </section>
+  </aside>
+
+  <main id="main">
+    <header id="top">
+      <button type="button" class="btn" id="filterToggle">Фильтры</button>
+      <input class="field grow" id="q" type="search" placeholder="Поиск по названию, каналу, заметкам и тегам  ( / )" aria-label="Поиск">
+      <select class="field" id="sort" aria-label="Сортировка">
+        <option value="views">Больше просмотров</option>
+        <option value="views_asc">Меньше просмотров</option>
+        <option value="outlier">Сильнее среднего канала</option>
+        <option value="added">Недавно добавленные</option>
+        <option value="date">Новые по дате публикации</option>
+        <option value="rating">По оценке</option>
+        <option value="title">По названию</option>
+      </select>
+      <label class="size">Размер <input type="range" id="size" min="200" max="520" step="10" value="260"></label>
+      <button type="button" class="btn" id="baseBtn" title="Скачать базу, загрузить из файла">База</button>
+      <button type="button" class="btn primary" id="importBtn">Добавить обложки</button>
+    </header>
+    <p id="count"></p>
+    <div id="grid"></div>
+    <div id="empty"></div>
+    <div id="sentinel"></div>
+  </main>
+</div>
+
+<div id="selbar" hidden>
+  <span class="count" id="selCount"></span>
+  <input class="field" id="selTag" list="tagList" placeholder="Тег для выбранных" aria-label="Тег для выбранных">
+  <button type="button" class="btn primary" id="selAdd">Добавить тег</button>
+  <button type="button" class="btn" id="selRemove">Убрать тег</button>
+  <button type="button" class="btn" id="selSave">★ Сохранить</button>
+  <button type="button" class="btn" id="selHide">Скрыть</button>
+  <button type="button" class="btn" id="selAll">Выбрать все</button>
+  <button type="button" class="btn" id="selClear">Снять выбор</button>
+  <button type="button" class="btn danger" id="selDelete">Удалить</button>
+</div>
+<datalist id="tagList"></datalist>
+
+<dialog id="viewer" aria-label="Обложка">
+  <button type="button" class="xbtn" id="vClose" aria-label="Закрыть">✕</button>
+  <div class="vwrap">
+    <div class="vimg">
+      <img id="vImg" alt="">
+      <button type="button" class="nav prev" id="vPrev" aria-label="Предыдущая">‹</button>
+      <button type="button" class="nav next" id="vNext" aria-label="Следующая">›</button>
+    </div>
+    <div class="vside">
+      <h2 id="vTitle"></h2>
+      <div class="vmeta" id="vMeta"></div>
+      <div>
+        <div class="vtags" id="vTags"></div>
+        <input class="field" id="vTagInput" list="tagList" placeholder="Новый тег и Enter" style="margin-top:8px" aria-label="Новый тег">
+      </div>
+      <div class="stars" id="vStars" role="group" aria-label="Оценка"></div>
+      <textarea class="field" id="vNote" placeholder="Заметка: что здесь работает?" aria-label="Заметка"></textarea>
+      <div class="vactions">
+        <a class="btn" id="vOpen" target="_blank" rel="noopener" style="text-decoration:none">Открыть на YouTube</a>
+        <a class="btn" id="vImgOpen" target="_blank" rel="noopener" style="text-decoration:none">Обложка в полном размере</a>
+        <button type="button" class="btn" id="vSave" title="Клавиша S">☆ Сохранить</button>
+        <button type="button" class="btn" id="vHide" title="Клавиша H">Скрыть</button>
+        <button type="button" class="btn danger" id="vDelete">Удалить</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="importer" aria-label="Добавить обложки">
+  <div class="imp">
+    <h2>Добавить обложки</h2>
+    <div id="impNoExt">
+      <p>Ролики с YouTube собирает расширение для браузера. Оно работает у тебя на компьютере, и данные остаются в твоём браузере.</p>
+      <ol class="steps">
+        <li>Скачай архив: <button type="button" class="btn primary" data-dl-ext>Скачать расширение</button></li>
+        <li>Распакуй архив в постоянную папку (потом её нельзя удалять и переносить).</li>
+        <li>Открой <b>chrome://extensions</b> (в Edge <b>edge://extensions</b>) и включи «Режим разработчика».</li>
+        <li>Нажми «Загрузить распакованное» и выбери папку, где лежит manifest.json.</li>
+        <li>Обнови эту страницу (F5), и здесь появится форма добавления.</li>
+      </ol>
+      <p class="hint">Работает в Chrome, Edge, Yandex Browser, Opera и других браузерах на Chromium.</p>
+    </div>
+    <p class="hint warn" id="impFileWarn" hidden>Каталог открыт как файл с диска. Расширению нужен адрес https:// (GitHub Pages) или http://localhost.</p>
+    <div id="impForm2" hidden>
+      <input class="field" id="impQuery" placeholder="Ссылка на канал, плейлист, поиск YouTube или видео, либо просто запрос" aria-label="Ссылка или запрос">
+      <div class="opts">
+        <span>Вкладка канала:</span>
+        <label><input type="radio" name="tab" value="videos" checked> Видео</label>
+        <label><input type="radio" name="tab" value="shorts"> Шортсы</label>
+        <label><input type="radio" name="tab" value="streams"> Трансляции</label>
+      </div>
+      <div class="opts">
+        <label>Сколько видео <input class="field" id="impLimit" type="number" min="1" max="500" value="50"></label>
+        <label><input type="checkbox" id="impFull" checked> Уточнять каждое видео (точные просмотры, даты, канал; медленнее)</label>
+      </div>
+      <progress id="impBar" value="0" max="1" hidden></progress>
+      <pre id="impLog" aria-live="polite">Новые видео добавятся к базе. Повторный импорт не создаёт дублей и не стирает теги.</pre>
+      <p class="hint">Расширение подключено. <button type="button" class="linkbtn" data-dl-ext>Скачать архив расширения ещё раз</button></p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="impStop" hidden>Остановить</button>
+      <button type="button" class="btn" id="impClose">Закрыть</button>
+      <button type="button" class="btn primary" id="impStart">Начать импорт</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="baseDlg" aria-label="База обложек">
+  <div class="imp">
+    <h2>База обложек</h2>
+    <p id="baseInfo"></p>
+    <section>
+      <h3>Скачать</h3>
+      <div class="opts">
+        <button type="button" class="btn primary" id="expAll">Скачать всю базу</button>
+        <button type="button" class="btn" id="expSel">Скачать текущую выборку</button>
+      </div>
+      <p class="hint" id="backupInfo"></p>
+    </section>
+    <section>
+      <h3>Загрузить из файла</h3>
+      <div class="drop" id="drop">Перетащи файл library.json сюда или <button type="button" class="linkbtn" id="pickFile">выбери его</button>. Подойдёт и файл из Python-версии.</div>
+      <input type="file" id="fileInput" accept=".json,application/json" hidden>
+      <div id="impChoice" hidden>
+        <p id="impSummary"></p>
+        <div class="actions">
+          <button type="button" class="btn primary" id="doMerge">Объединить с базой</button>
+          <button type="button" class="btn danger" id="doReplace">Заменить базу</button>
+          <button type="button" class="btn" id="doCancel">Отмена</button>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h3>Очистить</h3>
+      <div class="opts"><button type="button" class="btn danger" id="wipe">Удалить все обложки из базы…</button></div>
+    </section>
+    <div class="actions"><button type="button" class="btn" id="baseClose">Закрыть</button></div>
+  </div>
+</dialog>
+
+<div id="toast" hidden role="status"></div>
+
+<script>
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const fmtViews = v => {
+  if (v == null) return '—';
+  if (v >= 1e6) { let s = (v / 1e6).toFixed(v >= 1e7 ? 0 : 1); if (s.endsWith('.0')) s = s.slice(0, -2); return s.replace('.', ',') + ' млн'; }
+  if (v >= 1e3) return Math.round(v / 1e3) + ' тыс.';
+  return String(v);
+};
+const fmtDate = d => d ? d.split('-').reverse().join('.') : '';
+const fmtDur = s => { if (!s) return ''; s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}` : `${m}:${String(x).padStart(2,'0')}`; };
+const fmtOut = o => '×' + (o >= 10 ? Math.round(o) : o.toFixed(1)).toString().replace('.', ',');
+const thumbMax = id => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+const thumbMq = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+const ytUrl = r => r.kind === 'short' ? `https://www.youtube.com/shorts/${r.id}` : `https://www.youtube.com/watch?v=${r.id}`;
+const median = a => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const pluralVideo = n => { const a = n % 100, b = n % 10; return (a > 10 && a < 20) ? 'видео' : b === 1 ? 'видео' : 'видео'; };
+
+let LIB = [];
+const BY_ID = new Map();
+const CH = new Map();
+let filtered = [];
+let shown = 0;
+const PAGE = 60;
+const selected = new Set();
+let lastPicked = null;
+const S = { view: 'main', q: '', sort: 'views', tags: new Map(), tagMode: 'all', channels: new Set(), minV: null, maxV: null, outlier: 0, kind: '', rating: 0, tagQ: '', chanQ: '' };
+
+/* ---------- локальная база (IndexedDB) ---------- */
+const strip = r => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith('_')));
+function IDBStore() {
+  let db = null;
+  const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const done = tx => new Promise((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
+  return {
+    ok: false,
+    async open() {
+      const r = indexedDB.open('cover-catalog', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('videos', { keyPath: 'id' });
+      db = await req(r);
+      this.ok = true;
+    },
+    async getAll() { return db ? req(db.transaction('videos').objectStore('videos').getAll()) : []; },
+    async putMany(list) {
+      if (!db || !list.length) return;
+      const tx = db.transaction('videos', 'readwrite'); const st = tx.objectStore('videos');
+      list.forEach(r => st.put(strip(r)));
+      await done(tx);
+    },
+    async deleteMany(ids) {
+      if (!db || !ids.length) return;
+      const tx = db.transaction('videos', 'readwrite'); const st = tx.objectStore('videos');
+      ids.forEach(id => st.delete(id));
+      await done(tx);
+    },
+    async clear() {
+      if (!db) return;
+      const tx = db.transaction('videos', 'readwrite');
+      tx.objectStore('videos').clear();
+      await done(tx);
+    },
+  };
+}
+let DB = IDBStore();
+
+// Остальной код сообщает об изменениях через post(): записываем затронутые обложки в базу браузера.
+async function post(path, body = {}) {
+  if (path === '/api/delete') await DB.deleteMany(body.ids || []);
+  else if (path === '/api/rename_tag') await DB.putMany(LIB);
+  else {
+    const ids = body.ids || (body.id ? [body.id] : []);
+    await DB.putMany(ids.map(id => BY_ID.get(id)).filter(Boolean));
+  }
+  return { ok: true };
+}
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3800);
+}
+
+/* ---------- проверка и объединение записей ---------- */
+const ID_OK = /^[\w-]{11}$/;
+const str = (v, n) => typeof v === 'string' ? v.slice(0, n) : '';
+const numOrNull = v => (typeof v === 'number' && Number.isFinite(v)) ? v : null;
+function cleanRecord(x) {
+  if (!x || typeof x !== 'object' || !ID_OK.test(x.id || '')) return null;
+  const tags = Array.isArray(x.tags) ? [...new Set(x.tags.map(t => normTag(String(t))).filter(Boolean))] : [];
+  const saved = !!x.saved;
+  return {
+    id: x.id, title: str(x.title, 300), channel: str(x.channel, 120), channel_id: str(x.channel_id, 40),
+    views: numOrNull(x.views), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null,
+    duration: numOrNull(x.duration), kind: x.kind === 'short' ? 'short' : 'video',
+    tags, note: str(x.note, 5000), rating: Math.max(0, Math.min(5, parseInt(x.rating, 10) || 0)),
+    saved, hidden: !!x.hidden && !saved,
+    source: str(x.source, 200), added_at: str(x.added_at, 30) || new Date().toISOString(), checked_at: str(x.checked_at, 30),
+  };
+}
+const STAT_KEYS = ['title', 'channel', 'channel_id', 'views', 'date', 'duration', 'kind'];
+function mergeStats(local, inc) {
+  for (const k of STAT_KEYS) if (inc[k] !== null && inc[k] !== undefined && inc[k] !== '') local[k] = inc[k];
+}
+function mergeFileRecord(local, inc) {
+  inc.tags.forEach(t => { if (!local.tags.includes(t)) local.tags.push(t); });
+  if (!local.note && inc.note) local.note = inc.note;
+  local.rating = Math.max(local.rating || 0, inc.rating || 0);
+  if (inc.saved && !local.hidden) local.saved = true;
+  if ((inc.checked_at || '') >= (local.checked_at || '')) { mergeStats(local, inc); if (inc.checked_at) local.checked_at = inc.checked_at; }
+}
+
+// Ролик, присланный расширением: обновляет данные, теги и заметки не трогает.
+function applyItem(raw) {
+  const rec = cleanRecord({ ...raw, tags: [] });
+  if (!rec) return null;
+  const stamp = new Date().toISOString();
+  let v = BY_ID.get(rec.id), isNew = false;
+  if (v) { mergeStats(v, rec); v.checked_at = stamp; }
+  else {
+    v = { ...rec, tags: [], note: '', rating: 0, saved: false, hidden: false, added_at: stamp, checked_at: stamp };
+    LIB.push(v); BY_ID.set(v.id, v); isNew = true;
+  }
+  if (raw._op === 'save') { v.saved = true; v.hidden = false; }
+  touch(v);
+  return { v, isNew };
+}
+async function receiveItems(items) {
+  if (!Array.isArray(items) || !items.length) return;
+  const changed = [], ids = [];
+  let added = 0;
+  for (const raw of items) {
+    if (!raw || typeof raw.id !== 'string') continue;
+    ids.push(raw.id);
+    const r = applyItem(raw);
+    if (r) { changed.push(r.v); if (r.isNew) added++; }
+  }
+  try { await DB.putMany(changed); }
+  catch (e) { toast('Не удалось записать в базу: ' + e.message); return; }
+  toExt({ type: 'ack', ids });
+  prepare(); refresh(true);
+  if (added) toast(`Добавлено из расширения: ${added}`);
+}
+
+async function loadLibrary() {
+  LIB = (await DB.getAll()).map(cleanRecord).filter(Boolean);
+  BY_ID.clear();
+  LIB.forEach(v => BY_ID.set(v.id, v));
+  prepare();
+  refresh();
+}
+
+function prepare() {
+  CH.clear();
+  const groups = new Map();
+  for (const v of LIB) {
+    v._hay = (v.title + ' ' + v.channel + ' ' + (v.note || '') + ' ' + v.tags.join(' ')).toLowerCase();
+    v._out = null;
+    if (v.views != null) {
+      const k = v.channel_id || v.channel || '';
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(v);
+    }
+  }
+  for (const list of groups.values()) {
+    if (list.length < 5) continue;
+    const m = median(list.map(v => v.views));
+    if (m > 0) { CH.set(list[0].channel_id || list[0].channel || '', { m, n: list.length }); list.forEach(v => v._out = v.views / m); }
+  }
+}
+function touch(v) { v._hay = (v.title + ' ' + v.channel + ' ' + (v.note || '') + ' ' + v.tags.join(' ')).toLowerCase(); }
+
+/* ---------- фильтрация ---------- */
+function applyFilters() {
+  const terms = S.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const inc = [], exc = [];
+  S.tags.forEach((st, t) => (st === 'in' ? inc : exc).push(t));
+  const noTag = S.tags.get('__none__');
+  filtered = LIB.filter(v => {
+    if (S.view === 'hidden') { if (!v.hidden) return false; }
+    else { if (v.hidden) return false; if (S.view === 'saved' && !v.saved) return false; }
+    for (const t of terms) if (!v._hay.includes(t)) return false;
+    if (S.channels.size && !S.channels.has(v.channel_id || v.channel)) return false;
+    if (S.kind && v.kind !== S.kind) return false;
+    if (S.rating && (v.rating || 0) < S.rating) return false;
+    if (S.minV != null && (v.views == null || v.views < S.minV)) return false;
+    if (S.maxV != null && (v.views == null || v.views > S.maxV)) return false;
+    if (S.outlier && !(v._out != null && v._out >= S.outlier)) return false;
+    if (noTag === 'in' && v.tags.length) return false;
+    const realInc = inc.filter(t => t !== '__none__');
+    if (realInc.length) {
+      if (S.tagMode === 'all' ? !realInc.every(t => v.tags.includes(t)) : !realInc.some(t => v.tags.includes(t))) return false;
+    }
+    for (const t of exc) if (t === '__none__' ? !v.tags.length : v.tags.includes(t)) return false;
+    return true;
+  });
+  const by = {
+    views: (a, b) => (b.views ?? -1) - (a.views ?? -1),
+    views_asc: (a, b) => (a.views ?? Infinity) - (b.views ?? Infinity),
+    outlier: (a, b) => (b._out ?? -1) - (a._out ?? -1),
+    added: (a, b) => (b.added_at || '').localeCompare(a.added_at || ''),
+    date: (a, b) => (b.date || '').localeCompare(a.date || ''),
+    rating: (a, b) => (b.rating || 0) - (a.rating || 0) || (b.views ?? -1) - (a.views ?? -1),
+    title: (a, b) => a.title.localeCompare(b.title, 'ru'),
+  }[S.sort];
+  filtered.sort(by);
+}
+
+function refresh(keepScroll = false) {
+  applyFilters();
+  const ids = new Set(filtered.map(v => v.id));
+  for (const id of [...selected]) if (!ids.has(id)) selected.delete(id);
+  renderSidebar();
+  renderGrid(keepScroll);
+  renderSelbar();
+  $('#tagList').innerHTML = allTags().map(([t]) => `<option value="${esc(t)}"></option>`).join('');
+}
+
+/* ---------- боковая панель ---------- */
+const baseList = () => LIB.filter(v => S.view === 'hidden' ? v.hidden : (!v.hidden && (S.view !== 'saved' || v.saved)));
+function allTags(list = LIB) {
+  const m = new Map();
+  list.forEach(v => v.tags.forEach(t => m.set(t, (m.get(t) || 0) + 1)));
+  return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ru'));
+}
+function renderSidebar() {
+  renderBackup();
+  const base = baseList();
+  const nHid = LIB.filter(v => v.hidden).length, nSaved = LIB.filter(v => v.saved && !v.hidden).length;
+  $('#viewRows').innerHTML = [['main', 'Лента', LIB.length - nHid], ['saved', 'Сохранённые', nSaved], ['hidden', 'Скрытые', nHid]]
+    .map(([k, l, n]) => `<button type="button" class="row ${S.view === k ? 'in' : ''}" data-view="${k}"><span class="t">${l}</span><span class="n">${n}</span></button>`).join('');
+  const untagged = base.filter(v => !v.tags.length).length;
+  $('#libInfo').textContent = LIB.length ? `Всего обложек: ${LIB.length}` : 'Каталог пока пуст';
+
+  const tags = allTags(base).filter(([t]) => !S.tagQ || t.includes(S.tagQ.toLowerCase()));
+  let html = '';
+  if (!S.tagQ || 'без тегов'.includes(S.tagQ.toLowerCase())) {
+    const st = S.tags.get('__none__');
+    html += `<button type="button" class="row ${st || ''}" data-tag="__none__"><span class="t">Без тегов</span><span class="n">${untagged}</span></button>`;
+  }
+  html += tags.map(([t, n]) => `<button type="button" class="row ${S.tags.get(t) || ''}" data-tag="${esc(t)}"><span class="t">${esc(t)}</span><span class="n">${n}</span><span class="edit" data-edit="${esc(t)}" title="Переименовать или удалить тег" role="button" tabindex="0">✎</span></button>`).join('');
+  if (!tags.length && !html) html = '<p class="hint">Тегов пока нет. Выдели обложки и добавь тег.</p>';
+  $('#tagRows').innerHTML = html;
+  $('#tagMeta').textContent = tags.length ? String(tags.length) : '';
+
+  const ch = new Map();
+  base.forEach(v => { const k = v.channel_id || v.channel; if (!k) return; const e = ch.get(k) || { name: v.channel || k, n: 0 }; e.n++; ch.set(k, e); });
+  const list = [...ch.entries()].filter(([, e]) => !S.chanQ || e.name.toLowerCase().includes(S.chanQ.toLowerCase())).sort((a, b) => b[1].n - a[1].n).slice(0, 80);
+  $('#chanRows').innerHTML = list.map(([k, e]) => `<button type="button" class="row ${S.channels.has(k) ? 'in' : ''}" data-chan="${esc(k)}"><span class="t">${esc(e.name)}</span><span class="n">${e.n}</span></button>`).join('') || '<p class="hint">Каналов пока нет.</p>';
+  $('#chanMeta').textContent = ch.size ? String(ch.size) : '';
+
+  $$('#tagMode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.tagMode));
+  [['#outlier', S.outlier], ['#kind', S.kind], ['#rating', S.rating]].forEach(([sel, val]) =>
+    $$(sel + ' button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v) === String(val))));
+}
+
+/* ---------- сетка ---------- */
+function cardHTML(v) {
+  const sel = selected.has(v.id);
+  const tags = v.tags.slice(0, 3).map(t => `<span class="tag">${esc(t)}</span>`).join('') + (v.tags.length > 3 ? `<span class="tag more">+${v.tags.length - 3}</span>` : '');
+  const acts = v.hidden
+    ? '<div class="acts"><button type="button" class="act" data-act="unhide" title="Вернуть в ленту" aria-label="Вернуть в ленту">↩</button></div>'
+    : `<div class="acts"><button type="button" class="act ${v.saved ? 'on' : ''}" data-act="save" title="${v.saved ? 'Убрать из сохранённых' : 'Сохранить'}" aria-label="Сохранить" aria-pressed="${!!v.saved}">★</button><button type="button" class="act" data-act="hide" title="Скрыть из ленты" aria-label="Скрыть">⊘</button></div>`;
+  return `<article class="card ${sel ? 'sel' : ''} ${v.saved ? 'isSaved' : ''}" data-id="${v.id}">
+    <div class="thumb"><img loading="lazy" src="${thumbMax(v.id)}" alt="">
+      <button type="button" class="pick" aria-label="Выбрать" aria-pressed="${sel}">${sel ? '✓' : ''}</button>
+      ${v.saved ? '<span class="badge saved" title="Сохранено">★</span>' : ''}
+      ${v.kind === 'short' ? '<span class="badge short">Short</span>' : ''}
+      <span class="badge views">${fmtViews(v.views)}</span>
+      ${v.duration ? `<span class="badge dur">${fmtDur(v.duration)}</span>` : ''}
+      ${v._out != null && v._out >= 1.5 ? `<span class="badge out" title="Во сколько раз больше медианы канала">${fmtOut(v._out)}</span>` : ''}
+      ${acts}
+    </div>
+    <h3 class="title" style="font-size:14px">${esc(v.title)}</h3>
+    <div class="meta">${esc(v.channel)}${v.date ? ' · ' + fmtDate(v.date) : ''}</div>
+    ${tags ? `<div class="tags">${tags}</div>` : ''}
+  </article>`;
+}
+function renderGrid(keepScroll) {
+  const grid = $('#grid');
+  const target = keepScroll ? Math.max(PAGE, shown) : PAGE;
+  shown = 0;
+  grid.innerHTML = '';
+  appendCards(target);
+  $('#count').textContent = LIB.length ? `Показано ${filtered.length} из ${baseList().length}` : '';
+  const empty = $('#empty');
+  if (!LIB.length) {
+    empty.innerHTML = '<div class="empty"><h2>Каталог пуст</h2><p>Загрузи свою базу из файла или собери обложки с YouTube через расширение: вставь ссылку на канал или поиск, и они появятся здесь вместе с просмотрами.</p><button type="button" class="btn primary" data-act="import">Добавить обложки</button> <button type="button" class="btn" data-act="base">Загрузить базу из файла</button></div>';
+  } else if (!filtered.length && S.view === 'hidden' && !LIB.some(v => v.hidden)) {
+    empty.innerHTML = '<div class="empty"><h2>Скрытых обложек нет</h2><p>Нажми ⊘ на карточке, и обложка уйдёт из ленты. Здесь её можно будет вернуть.</p></div>';
+  } else if (!filtered.length && S.view === 'saved' && !LIB.some(v => v.saved && !v.hidden)) {
+    empty.innerHTML = '<div class="empty"><h2>Сохранённых обложек пока нет</h2><p>Нажми ★ на карточке, чтобы отложить удачный референс.</p></div>';
+  } else if (!filtered.length) {
+    empty.innerHTML = '<div class="empty"><h2>Ничего не найдено</h2><p>Под эти фильтры не подходит ни одна обложка.</p><button type="button" class="btn" data-act="reset">Сбросить фильтры</button></div>';
+  } else empty.innerHTML = '';
+  grid.classList.toggle('selecting', selected.size > 0);
+}
+function appendCards(n) {
+  const slice = filtered.slice(shown, shown + n);
+  if (!slice.length) return;
+  $('#grid').insertAdjacentHTML('beforeend', slice.map(cardHTML).join(''));
+  shown += slice.length;
+}
+new IntersectionObserver(es => { if (es[0].isIntersecting && shown < filtered.length) appendCards(PAGE); }, { rootMargin: '900px' }).observe($('#sentinel'));
+
+$('#grid').addEventListener('error', e => {
+  const img = e.target;
+  if (img.tagName === 'IMG' && !img.dataset.fb) { img.dataset.fb = '1'; const id = img.closest('.card')?.dataset.id || img.dataset.id; if (id) img.src = thumbMq(id); }
+}, true);
+
+$('#grid').addEventListener('click', e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const id = card.dataset.id;
+  const act = e.target.closest('.act');
+  if (act) {
+    e.preventDefault(); e.stopPropagation();
+    const a = act.dataset.act, v = BY_ID.get(id);
+    if (a === 'save') setFlag([id], { saved: !v.saved });
+    else if (a === 'hide') { setFlag([id], { hidden: true }); toast('Скрыто. Вернуть можно в разделе «Скрытые».'); }
+    else if (a === 'unhide') setFlag([id], { hidden: false });
+    return;
+  }
+  if (e.target.closest('.pick') || selected.size > 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+    e.preventDefault();
+    if (e.shiftKey && lastPicked && lastPicked !== id) {
+      const a = filtered.findIndex(v => v.id === lastPicked), b = filtered.findIndex(v => v.id === id);
+      if (a >= 0 && b >= 0) filtered.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(v => selected.add(v.id));
+    } else selected.has(id) ? selected.delete(id) : selected.add(id);
+    lastPicked = id;
+    syncSelection();
+    return;
+  }
+  openViewer(id);
+});
+function syncSelection() {
+  $$('#grid .card').forEach(c => {
+    const on = selected.has(c.dataset.id);
+    c.classList.toggle('sel', on);
+    const p = $('.pick', c); p.textContent = on ? '✓' : ''; p.setAttribute('aria-pressed', on);
+  });
+  $('#grid').classList.toggle('selecting', selected.size > 0);
+  renderSelbar();
+}
+function renderSelbar() {
+  const bar = $('#selbar');
+  bar.hidden = selected.size === 0;
+  $('#selCount').textContent = `Выбрано: ${selected.size}`;
+  $('#selAll').hidden = selected.size >= filtered.length;
+  $('#selSave').hidden = S.view === 'hidden';
+  $('#selHide').textContent = S.view === 'hidden' ? 'Вернуть в ленту' : 'Скрыть';
+}
+
+/* ---------- действия с тегами ---------- */
+const normTag = t => t.trim().replace(/^#+/, '').toLowerCase().replace(/\s+/g, ' ').slice(0, 40);
+async function changeTags(ids, add, remove) {
+  add = add.map(normTag).filter(Boolean); remove = remove.map(normTag).filter(Boolean);
+  if (!ids.length || (!add.length && !remove.length)) return;
+  ids.forEach(id => {
+    const v = BY_ID.get(id); if (!v) return;
+    v.tags = v.tags.filter(t => !remove.includes(t));
+    add.forEach(t => { if (!v.tags.includes(t)) v.tags.push(t); });
+    touch(v);
+  });
+  refresh(true);
+  try { await post('/api/tags', { ids, add, remove }); }
+  catch (err) { toast(err.message); loadLibrary(); }
+}
+$('#selAdd').onclick = async () => { const t = $('#selTag').value; if (!normTag(t)) return toast('Введи тег'); await changeTags([...selected], [t], []); toast(`Тег «${normTag(t)}» добавлен`); $('#selTag').value = ''; };
+$('#selTag').addEventListener('keydown', e => { if (e.key === 'Enter') $('#selAdd').click(); });
+$('#selRemove').onclick = async () => { const t = $('#selTag').value; if (!normTag(t)) return toast('Введи тег, который нужно убрать'); await changeTags([...selected], [], [t]); toast(`Тег «${normTag(t)}» убран`); $('#selTag').value = ''; };
+$('#selAll').onclick = () => { filtered.forEach(v => selected.add(v.id)); syncSelection(); };
+$('#selSave').onclick = () => { const ids = [...selected]; setFlag(ids, { saved: true }); toast(`Сохранено: ${ids.length}`); };
+$('#selHide').onclick = () => {
+  const ids = [...selected], back = S.view === 'hidden';
+  setFlag(ids, { hidden: !back }); toast(back ? `Возвращено в ленту: ${ids.length}` : `Скрыто: ${ids.length}`);
+};
+$('#selClear').onclick = () => { selected.clear(); syncSelection(); };
+$('#selDelete').onclick = async () => {
+  const ids = [...selected];
+  if (!confirm(`Удалить из каталога обложек: ${ids.length}? Теги и заметки к ним пропадут.`)) return;
+  await removeVideos(ids);
+};
+async function removeVideos(ids) {
+  ids.forEach(id => { const v = BY_ID.get(id); if (v) { LIB.splice(LIB.indexOf(v), 1); BY_ID.delete(id); } selected.delete(id); });
+  prepare(); refresh(true);
+  try { await post('/api/delete', { ids }); toast('Удалено'); } catch (err) { toast(err.message); loadLibrary(); }
+}
+
+async function setFlag(ids, patch) {
+  ids.forEach(id => {
+    const v = BY_ID.get(id); if (!v) return;
+    if ('hidden' in patch) { v.hidden = patch.hidden; if (patch.hidden) v.saved = false; }
+    else if ('saved' in patch) { v.saved = patch.saved; if (patch.saved) v.hidden = false; }
+  });
+  refresh(true);
+  try { await post('/api/flag', { ids, ...patch }); } catch (err) { toast(err.message); loadLibrary(); }
+}
+$('#viewRows').addEventListener('click', e => {
+  const b = e.target.closest('[data-view]'); if (!b) return;
+  S.view = b.dataset.view; selected.clear(); refresh();
+});
+
+/* ---------- боковая панель: события ---------- */
+$('#tagRows').addEventListener('click', async e => {
+  const ed = e.target.closest('[data-edit]');
+  if (ed) {
+    e.stopPropagation();
+    const old = ed.dataset.edit;
+    const val = prompt(`Новое имя для тега «${old}».\nОставь пустым, чтобы удалить тег у всех обложек.`, old);
+    if (val === null) return;
+    const nv = normTag(val);
+    LIB.forEach(v => { if (v.tags.includes(old)) { v.tags = v.tags.filter(t => t !== old); if (nv && !v.tags.includes(nv)) v.tags.push(nv); touch(v); } });
+    S.tags.delete(old);
+    refresh(true);
+    try { await post('/api/rename_tag', { old, new: nv }); } catch (err) { toast(err.message); loadLibrary(); }
+    return;
+  }
+  const row = e.target.closest('[data-tag]'); if (!row) return;
+  const t = row.dataset.tag, cur = S.tags.get(t);
+  if (!cur) S.tags.set(t, 'in'); else if (cur === 'in') S.tags.set(t, 'out'); else S.tags.delete(t);
+  refresh();
+});
+$('#chanRows').addEventListener('click', e => {
+  const row = e.target.closest('[data-chan]'); if (!row) return;
+  const k = row.dataset.chan; S.channels.has(k) ? S.channels.delete(k) : S.channels.add(k); refresh();
+});
+$('#tagMode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { S.tagMode = b.dataset.mode; refresh(); } });
+[['#outlier', 'outlier', Number], ['#kind', 'kind', String], ['#rating', 'rating', Number]].forEach(([sel, key, conv]) =>
+  $(sel).addEventListener('click', e => { const b = e.target.closest('button'); if (b) { S[key] = conv(b.dataset.v); refresh(); } }));
+$('#tagSearch').addEventListener('input', e => { S.tagQ = e.target.value.trim(); renderSidebar(); });
+$('#chanSearch').addEventListener('input', e => { S.chanQ = e.target.value.trim(); renderSidebar(); });
+const num = s => s === '' ? null : Math.max(0, Number(s));
+$('#minV').addEventListener('input', e => { S.minV = num(e.target.value); refresh(); });
+$('#maxV').addEventListener('input', e => { S.maxV = num(e.target.value); refresh(); });
+$('#viewPresets').addEventListener('click', e => { const b = e.target.closest('[data-min]'); if (!b) return; S.minV = Number(b.dataset.min); $('#minV').value = S.minV; refresh(); });
+function resetAll() {
+  Object.assign(S, { q: '', tags: new Map(), channels: new Set(), minV: null, maxV: null, outlier: 0, kind: '', rating: 0, tagQ: '', chanQ: '' });
+  ['#q', '#minV', '#maxV', '#tagSearch', '#chanSearch'].forEach(s => $(s).value = '');
+  refresh();
+}
+$('#resetAll').onclick = resetAll;
+$('#empty').addEventListener('click', e => { const a = e.target.closest('[data-act]')?.dataset.act; if (a === 'import') openImporter(); if (a === 'base') openBase(); if (a === 'reset') resetAll(); });
+
+/* ---------- верхняя панель ---------- */
+let qTimer;
+$('#q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.q = e.target.value; refresh(); }, 120); });
+$('#sort').addEventListener('change', e => { S.sort = e.target.value; savePref(); refresh(); });
+$('#size').addEventListener('input', e => { document.documentElement.style.setProperty('--card', e.target.value + 'px'); savePref(); });
+$('#filterToggle').onclick = () => document.body.classList.toggle('filters-open');
+$('#main').addEventListener('click', () => document.body.classList.remove('filters-open'));
+function savePref() { try { localStorage.setItem('cc-pref', JSON.stringify({ sort: S.sort, size: $('#size').value })); } catch (e) {} }
+function loadPref() {
+  try {
+    const p = JSON.parse(localStorage.getItem('cc-pref') || '{}');
+    if (p.sort) { S.sort = p.sort; $('#sort').value = p.sort; }
+    if (p.size) { $('#size').value = p.size; document.documentElement.style.setProperty('--card', p.size + 'px'); }
+  } catch (e) {}
+}
+
+/* ---------- просмотр обложки ---------- */
+let viewList = [], viewIdx = -1, noteTimer;
+function openViewer(id) {
+  viewList = filtered.map(v => v.id); viewIdx = viewList.indexOf(id);
+  if (viewIdx < 0) return;
+  renderViewer();
+  if (!$('#viewer').open) $('#viewer').showModal();
+}
+function curVideo() { return BY_ID.get(viewList[viewIdx]); }
+function renderViewer() {
+  const v = curVideo(); if (!v) return;
+  const img = $('#vImg'); img.dataset.fb = ''; img.src = thumbMax(v.id);
+  img.onerror = () => { if (!img.dataset.fb) { img.dataset.fb = '1'; img.src = `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`; } };
+  $('#vTitle').textContent = v.title;
+  const meta = [`<span><b>${fmtViews(v.views)}</b> просмотров</span>`];
+  if (v.channel) meta.push(`<span>${esc(v.channel)}</span>`);
+  if (v.date) meta.push(`<span>${fmtDate(v.date)}</span>`);
+  if (v.duration) meta.push(`<span>${fmtDur(v.duration)}</span>`);
+  if (v._out != null) {
+    const st = CH.get(v.channel_id || v.channel || '');
+    meta.push(`<span title="Во сколько раз больше медианы канала"><b>${fmtOut(v._out)}</b> к медиане канала</span>`);
+    if (st) meta.push(`<span>Медиана канала: <b>${fmtViews(Math.round(st.m))}</b> по ${st.n} видео, скрытые учтены</span>`);
+  }
+  if (v.source) meta.push(`<span>${esc(v.source)}</span>`);
+  $('#vMeta').innerHTML = meta.join('');
+  $('#vTags').innerHTML = v.tags.map(t => `<span class="tag">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Убрать тег ${esc(t)}">✕</button></span>`).join('');
+  $('#vStars').innerHTML = [1, 2, 3, 4, 5].map(i => `<button type="button" class="${(v.rating || 0) >= i ? 'on' : ''}" data-star="${i}" aria-label="Оценка ${i}">★</button>`).join('');
+  $('#vNote').value = v.note || '';
+  $('#vSave').textContent = v.saved ? '★ Сохранено' : '☆ Сохранить';
+  $('#vSave').classList.toggle('primary', !!v.saved);
+  $('#vHide').textContent = v.hidden ? 'Вернуть в ленту' : 'Скрыть';
+  $('#vOpen').href = ytUrl(v); $('#vImgOpen').href = thumbMax(v.id);
+  $('#vPrev').hidden = viewIdx <= 0; $('#vNext').hidden = viewIdx >= viewList.length - 1;
+}
+function flushNote() {
+  clearTimeout(noteTimer);
+  const v = curVideo(); if (!v) return;
+  const val = $('#vNote').value;
+  if (val === (v.note || '')) return;
+  v.note = val; touch(v);
+  post('/api/update', { id: v.id, note: val }).catch(e => toast(e.message));
+}
+function go(d) { flushNote(); const n = viewIdx + d; if (n >= 0 && n < viewList.length) { viewIdx = n; renderViewer(); } }
+$('#vPrev').onclick = () => go(-1); $('#vNext').onclick = () => go(1);
+$('#vClose').onclick = () => $('#viewer').close();
+$('#viewer').addEventListener('close', () => { flushNote(); refresh(true); });
+$('#viewer').addEventListener('click', e => { if (e.target === $('#viewer')) $('#viewer').close(); });
+$('#viewer').addEventListener('keydown', e => {
+  if (e.target.matches('input,textarea')) return;
+  if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1);
+  if (e.code === 'KeyS' && !e.ctrlKey && !e.metaKey) $('#vSave').click();
+  if (e.code === 'KeyH' && !e.ctrlKey && !e.metaKey) $('#vHide').click();
+});
+$('#vNote').addEventListener('input', () => { clearTimeout(noteTimer); noteTimer = setTimeout(flushNote, 700); });
+$('#vTagInput').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter') return; e.preventDefault();
+  const t = $('#vTagInput').value; if (!normTag(t)) return;
+  const v = curVideo(); $('#vTagInput').value = '';
+  await changeTags([v.id], [t], []); renderViewer();
+});
+$('#vTags').addEventListener('click', async e => { const b = e.target.closest('[data-rm]'); if (!b) return; await changeTags([curVideo().id], [], [b.dataset.rm]); renderViewer(); });
+$('#vStars').addEventListener('click', e => {
+  const b = e.target.closest('[data-star]'); if (!b) return;
+  const v = curVideo(), n = Number(b.dataset.star), val = v.rating === n ? 0 : n;
+  v.rating = val; renderViewer();
+  post('/api/update', { id: v.id, rating: val }).catch(err => toast(err.message));
+});
+$('#vSave').onclick = async () => { const v = curVideo(); await setFlag([v.id], { saved: !v.saved }); renderViewer(); };
+$('#vHide').onclick = async () => {
+  const v = curVideo(), hide = !v.hidden;
+  await setFlag([v.id], { hidden: hide });
+  if (hide && viewIdx < viewList.length - 1) go(1); else renderViewer();
+};
+$('#vDelete').onclick = async () => {
+  const v = curVideo(); if (!confirm('Удалить эту обложку из каталога?')) return;
+  const id = v.id; viewList.splice(viewIdx, 1);
+  await removeVideos([id]);
+  if (!viewList.length) $('#viewer').close(); else { viewIdx = Math.min(viewIdx, viewList.length - 1); renderViewer(); }
+};
+
+/* ---------- расширение: связь ---------- */
+const ext = { ready: false, version: '' };
+function toExt(msg) { window.postMessage({ cc: 'site', ...msg }, '*'); }
+window.addEventListener('message', e => {
+  if (e.source !== window || !e.data || e.data.cc !== 'ext') return;
+  const m = e.data;
+  if (m.type === 'ready') { ext.ready = true; ext.version = m.version || ''; updateExtUI(); }
+  else if (m.type === 'items') receiveItems(m.items);
+  else if (m.type === 'job') receiveJob(m.job);
+  else if (m.type === 'error') toast('Расширение: ' + m.error);
+});
+function updateExtUI() {
+  $('#extText').textContent = ext.ready ? '✓ Расширение подключено' : 'Расширение не установлено';
+  $('#impNoExt').hidden = ext.ready;
+  $('#impForm2').hidden = !ext.ready;
+  $('#impFileWarn').hidden = location.protocol !== 'file:';
+}
+
+/* ---------- добавление обложек (импорт по ссылке через расширение) ---------- */
+let jobRunning = false, startTimer = null;
+function receiveJob(j) {
+  if (!j) return;
+  clearTimeout(startTimer);
+  const log = $('#impLog'); log.textContent = (j.log || []).join('\n'); log.scrollTop = log.scrollHeight;
+  const bar = $('#impBar'); bar.hidden = !(j.running || j.total); bar.max = Math.max(j.total || 0, 1); bar.value = j.done || 0;
+  $('#impStop').hidden = !j.running; $('#impStart').disabled = !!j.running;
+  $('#importBtn').textContent = j.running ? `Импорт: ${j.done || 0}/${j.total || '…'}` : 'Добавить обложки';
+  if (jobRunning && !j.running) toast(j.error ? 'Импорт остановился: ' + j.error : 'Импорт завершён');
+  jobRunning = !!j.running;
+}
+function openImporter() { updateExtUI(); toExt({ type: 'hello' }); $('#importer').showModal(); if (ext.ready) $('#impQuery').focus(); }
+$('#importBtn').onclick = openImporter;
+$('#extRow').onclick = openImporter;
+$('#impClose').onclick = () => $('#importer').close();
+$('#impStart').onclick = () => {
+  const query = $('#impQuery').value.trim();
+  if (!query) { $('#impLog').textContent = 'Вставь ссылку на канал, плейлист, поиск или видео, либо просто запрос.'; return; }
+  $('#impLog').textContent = 'Запускаю…';
+  toExt({ type: 'import', params: { query, tab: $('input[name=tab]:checked').value, limit: Number($('#impLimit').value) || 50, full: $('#impFull').checked } });
+  clearTimeout(startTimer);
+  startTimer = setTimeout(() => { $('#impLog').textContent = 'Расширение не отвечает. Обнови эту страницу и страницу YouTube (F5) и повтори.'; }, 6000);
+};
+$('#impStop').onclick = () => toExt({ type: 'cancel' });
+$('#impQuery').addEventListener('keydown', e => { if (e.key === 'Enter') $('#impStart').click(); });
+
+/* ---------- архив с расширением (собирается прямо в браузере) ---------- */
+const EXT_FILES = {"manifest.json": "{\n  \"manifest_version\": 3,\n  \"name\": \"Каталог обложек\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Собирает обложки с YouTube и передаёт их в твой каталог обложек. Данные остаются в твоём браузере.\",\n  \"permissions\": [\"storage\", \"declarativeNetRequest\"],\n  \"host_permissions\": [\"https://www.youtube.com/*\"],\n  \"background\": { \"service_worker\": \"background.js\", \"type\": \"module\" },\n  \"action\": { \"default_popup\": \"popup.html\", \"default_title\": \"Каталог обложек\" },\n  \"content_scripts\": [\n    { \"matches\": [\"https://www.youtube.com/*\"], \"js\": [\"youtube.js\"], \"run_at\": \"document_idle\" },\n    { \"matches\": [\"__SITE_MATCHES__\"], \"js\": [\"bridge.js\"], \"run_at\": \"document_start\" }\n  ]\n}\n", "background.js": "// background.js — сервисный скрипт расширения: парсинг по ссылке и приём сохранений с YouTube.\n// Всё, что нужно передать на сайт, кладётся в хранилище расширения под ключами \"ob:<id>\" (очередь),\n// а прогресс импорта в ключ \"job\". Мост на странице сайта (bridge.js) их оттуда забирает.\n\nimport { buildTarget, fetchText, fetchBrowse, fetchDetails, extractJson, getCfg, collect, withLang } from './yt.js';\n\nlet running = false;\nlet cancelFlag = false;\nlet job = null;\nlet lastJobWrite = 0;\n\nconst store = chrome.storage.local;\nconst clamp = (n, a, b) => Math.min(b, Math.max(a, n));\n\n/* ---------- заголовки для запросов к внутреннему API ---------- */\n// Запросы к youtubei выглядят для YouTube так, будто их шлёт его собственная страница.\nasync function setRules() {\n  try {\n    await chrome.declarativeNetRequest.updateSessionRules({\n      removeRuleIds: [1],\n      addRules: [{\n        id: 1, priority: 1,\n        action: {\n          type: 'modifyHeaders',\n          requestHeaders: [\n            { header: 'origin', operation: 'set', value: 'https://www.youtube.com' },\n            { header: 'referer', operation: 'set', value: 'https://www.youtube.com/' },\n          ],\n        },\n        condition: { urlFilter: '||www.youtube.com/youtubei/', resourceTypes: ['xmlhttprequest', 'other'] },\n      }],\n    });\n  } catch (e) { console.warn('declarativeNetRequest:', e); }\n}\nsetRules();\nchrome.runtime.onInstalled.addListener(setRules);\nchrome.runtime.onStartup.addListener(setRules);\n\n/* ---------- очередь на сайт ---------- */\nasync function putOutbox(list) {\n  if (!list.length) return;\n  const keys = list.map(r => 'ob:' + r.id);\n  const old = await store.get(keys);\n  const out = {};\n  for (const r of list) {\n    const prev = old['ob:' + r.id];\n    // уже ждущее «сохранить» не должно превратиться в простое «добавить»\n    out['ob:' + r.id] = { ...(prev || {}), ...r, _op: prev?._op === 'save' ? 'save' : r._op };\n  }\n  await store.set(out);\n}\n\n/* ---------- состояние задачи ---------- */\nfunction log(msg) { job.log = [...(job.log || []), msg].slice(-80); }\nasync function setJob(patch, force = false) {\n  job = { ...job, ...patch };\n  const now = Date.now();\n  if (force || now - lastJobWrite > 250) { lastJobWrite = now; await store.set({ job }); }\n}\n\n/* ---------- сохранение с YouTube ---------- */\nasync function handleSave({ items, op }) {\n  for (const it of items || []) {\n    if (!/^[\\w-]{11}$/.test(it.id || '')) continue;\n    let rec = { id: it.id, title: it.title || '', kind: it.kind === 'short' ? 'short' : 'video' };\n    try {\n      const d = await fetchDetails(it.id);\n      rec = { ...rec, ...d, kind: rec.kind };\n    } catch (e) { /* оставляем то, что успели узнать со страницы */ }\n    await putOutbox([{ ...rec, source: 'Расширение', _op: op === 'save' ? 'save' : 'add' }]);\n  }\n}\n\n/* ---------- импорт по ссылке ---------- */\nasync function runImport(p) {\n  running = true; cancelFlag = false;\n  job = { id: Date.now(), running: true, done: 0, total: 0, log: [], error: null };\n  await setJob({}, true);\n  try {\n    const limit = clamp(parseInt(p.limit, 10) || 50, 1, 500);\n    const tab = ['videos', 'shorts', 'streams'].includes(p.tab) ? p.tab : 'videos';\n    const t = buildTarget(p.query, tab);\n    let items = [], channel = { id: '', title: '' }, source = 'Ссылка';\n\n    if (t.mode === 'video') {\n      items = [{ id: t.id, kind: 'video' }];\n    } else {\n      log(`Читаю: ${t.url}`);\n      await setJob({});\n      const html = await fetchText(withLang(t.url));\n      const data = extractJson(html, 'ytInitialData');\n      if (!data) throw new Error('На странице нет данных. YouTube мог изменить формат или потребовать войти в аккаунт.');\n      const cfg = getCfg(html);\n      let page = collect(data);\n      channel = page.channel;\n      const map = new Map(page.videos.map(v => [v.id, v]));\n      let token = page.token, pages = 1;\n      while (map.size < limit && token && !cancelFlag && pages < 80) {\n        try {\n          const resp = await fetchBrowse(cfg, t.mode === 'search' ? 'search' : 'browse', token);\n          page = collect(resp);\n        } catch (e) {\n          log(`Дальше листать не удалось (${e.message}). Беру то, что уже собрано.`);\n          break;\n        }\n        const before = map.size;\n        page.videos.forEach(v => { if (!map.has(v.id)) map.set(v.id, v); });\n        token = page.token; pages++;\n        log(`Найдено: ${Math.min(map.size, limit)}`);\n        await setJob({ total: Math.min(map.size, limit) });\n        if (map.size === before && !token) break;\n      }\n      items = [...map.values()].slice(0, limit);\n      source = t.mode === 'search' ? `Поиск: ${t.label}` : t.mode === 'channel' ? `Канал: ${channel.title || t.label}` : 'Плейлист';\n      if (!items.length) throw new Error('Видео не найдено. Для канала попробуй другую вкладку (Видео, Шортсы, Трансляции).');\n    }\n\n    items = items.map(v => ({\n      ...v,\n      channel: v.channel || channel.title || '',\n      channel_id: v.channel_id || channel.id || '',\n      source, _op: 'add',\n    }));\n    await setJob({ total: items.length, done: 0 }, true);\n    log(`Найдено видео: ${items.length}`);\n    for (let i = 0; i < items.length; i += 30) await putOutbox(items.slice(i, i + 30));\n\n    if (p.full || t.mode === 'video') {\n      log('Уточняю данные у каждого видео (точные просмотры, даты, канал).');\n      let batch = [];\n      for (let i = 0; i < items.length; i++) {\n        if (cancelFlag) { log('Остановлено. Всё, что собрано, уже передано в каталог.'); break; }\n        try {\n          const d = await fetchDetails(items[i].id);\n          items[i] = { ...items[i], ...d, kind: items[i].kind };\n          batch.push(items[i]);\n        } catch (e) { log(`  ! ${items[i].id}: ${e.message}`); }\n        if (batch.length >= 5) { await putOutbox(batch); batch = []; }\n        await setJob({ done: i + 1 });\n      }\n      await putOutbox(batch);\n    } else {\n      await setJob({ done: items.length });\n    }\n    log('Готово. Каталог получит ролики, как только откроется страница сайта.');\n  } catch (e) {\n    job.error = String(e.message || e);\n    log(`Ошибка: ${job.error}`);\n  } finally {\n    running = false;\n    await setJob({ running: false }, true);\n  }\n}\n\n/* ---------- сообщения ---------- */\nchrome.runtime.onMessage.addListener((msg, sender, send) => {\n  if (!msg) return;\n  if (msg.type === 'save') {\n    handleSave(msg).then(() => send({ ok: true }), e => send({ ok: false, error: String(e.message || e) }));\n    return true;\n  }\n  if (msg.type === 'import') {\n    if (running) { send({ ok: false, error: 'Импорт уже идёт.' }); return; }\n    runImport(msg.params || {});\n    send({ ok: true });\n    return;\n  }\n  if (msg.type === 'cancel') { cancelFlag = true; send({ ok: true }); return; }\n  if (msg.type === 'site-url') { store.set({ siteUrl: msg.url }); send({ ok: true }); return; }\n});\n", "yt.js": "// yt.js — разбор страниц YouTube и его внутреннего API.\n// Почти всё здесь чистые функции (их можно проверять тестами), сеть только в fetch*.\n// YouTube не публикует этот формат и периодически меняет его: если что-то перестанет\n// находиться, чинить нужно именно этот файл.\n\nconst sleep = ms => new Promise(r => setTimeout(r, ms));\n\nexport function withLang(url) {\n  if (/[?&]hl=/.test(url)) return url;\n  return url + (url.includes('?') ? '&' : '?') + 'hl=en&gl=US';\n}\n\n/* ---------- разбор текстов ---------- */\n\nexport function text(x) {\n  if (!x) return '';\n  if (typeof x === 'string') return x;\n  if (typeof x.simpleText === 'string') return x.simpleText;\n  if (Array.isArray(x.runs)) return x.runs.map(r => r.text || '').join('');\n  if (typeof x.content === 'string') return x.content;\n  return '';\n}\n\nexport function parseViews(s) {\n  if (!s) return null;\n  s = String(s);\n  if (/no views/i.test(s)) return 0;\n  const m = s.match(/(\\d[\\d.,\\s]*)\\s*([KMB])?\\s*views?/i);\n  if (!m) return null;\n  const suf = (m[2] || '').toUpperCase();\n  if (suf) return Math.round(parseFloat(m[1].replace(/,/g, '.')) * { K: 1e3, M: 1e6, B: 1e9 }[suf]);\n  const n = parseInt(m[1].replace(/\\D/g, ''), 10);\n  return Number.isFinite(n) ? n : null;\n}\n\n// В подписи для скринридера обычно лежит полное число просмотров: «… 1,234,567 views».\nexport function a11yViews(label) {\n  if (!label) return null;\n  const all = [...String(label).matchAll(/(\\d{1,3}(?:,\\d{3})+|\\d+)\\s+views?/gi)];\n  if (!all.length) return null;\n  return parseInt(all[all.length - 1][1].replace(/,/g, ''), 10);\n}\n\nexport function parseDuration(s) {\n  const m = String(s || '').trim().match(/^(\\d+):(\\d{2})(?::(\\d{2}))?$/);\n  if (!m) return null;\n  return m[3] !== undefined ? +m[1] * 3600 + +m[2] * 60 + +m[3] : +m[1] * 60 + +m[2];\n}\n\nconst ID_RE = /^[\\w-]{11}$/;\nconst compact = o => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));\n\nfunction collectStrings(node, out, keys = ['content', 'text']) {\n  if (!node || typeof node !== 'object') return;\n  if (Array.isArray(node)) { node.forEach(n => collectStrings(n, out, keys)); return; }\n  for (const [k, v] of Object.entries(node)) {\n    if (typeof v === 'string' && keys.includes(k)) out.push(v);\n    else if (v && typeof v === 'object') collectStrings(v, out, keys);\n  }\n}\n\n/* ---------- отдельные виды карточек ---------- */\n\nexport function fromVideoRenderer(v) {\n  const id = v.videoId;\n  if (!ID_RE.test(id || '')) return null;\n  let views = a11yViews(v.title?.accessibility?.accessibilityData?.label);\n  if (views == null) views = parseViews(text(v.viewCountText));\n  if (views == null) views = parseViews(text(v.shortViewCountText));\n  let duration = parseDuration(text(v.lengthText));\n  let short = !!v.navigationEndpoint?.reelWatchEndpoint;\n  for (const o of v.thumbnailOverlays || []) {\n    const t = o.thumbnailOverlayTimeStatusRenderer;\n    if (!t) continue;\n    if (duration == null) duration = parseDuration(text(t.text));\n    if (t.style === 'SHORTS') short = true;\n  }\n  const byline = v.ownerText || v.longBylineText || v.shortBylineText;\n  return compact({\n    id, title: text(v.title), views, duration,\n    channel: text(byline),\n    channel_id: byline?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId || '',\n    kind: short ? 'short' : 'video',\n  });\n}\n\nexport function fromLockup(v) {\n  if (v.contentType && v.contentType !== 'LOCKUP_CONTENT_TYPE_VIDEO') return null;\n  const id = v.contentId;\n  if (!ID_RE.test(id || '')) return null;\n  const md = v.metadata?.lockupMetadataViewModel;\n  const strings = [];\n  collectStrings(md, strings);\n  let views = null;\n  for (const s of strings) { views = parseViews(s); if (views != null) break; }\n  const imgStrings = [];\n  collectStrings(v.contentImage, imgStrings);\n  const dur = imgStrings.map(parseDuration).find(x => x != null);\n  return compact({ id, title: text(md?.title), views, duration: dur ?? null, kind: 'video' });\n}\n\nexport function fromReel(v) {\n  const id = v.videoId;\n  if (!ID_RE.test(id || '')) return null;\n  return compact({ id, title: text(v.headline), views: parseViews(text(v.viewCountText)), kind: 'short' });\n}\n\nexport function fromShortsLockup(v) {\n  const id = v.onTap?.innertubeCommand?.reelWatchEndpoint?.videoId || String(v.entityId || '').replace(/^shorts-shelf-item-/, '');\n  if (!ID_RE.test(id || '')) return null;\n  return compact({\n    id, title: text(v.overlayMetadata?.primaryText),\n    views: parseViews(text(v.overlayMetadata?.secondaryText)), kind: 'short',\n  });\n}\n\nexport function fromPlaylistVideo(v) {\n  const id = v.videoId;\n  if (!ID_RE.test(id || '')) return null;\n  const byline = v.shortBylineText;\n  const secs = parseInt(v.lengthSeconds, 10);\n  return compact({\n    id, title: text(v.title), views: parseViews(text(v.videoInfo)),\n    duration: Number.isFinite(secs) ? secs : null,\n    channel: text(byline), channel_id: byline?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId || '',\n    kind: 'video',\n  });\n}\n\n/* ---------- обход ответа YouTube ---------- */\n\nexport function collect(data) {\n  const videos = new Map();\n  const state = { token: null, channel: { id: '', title: '' } };\n  const add = r => { if (r && !videos.has(r.id)) videos.set(r.id, r); };\n  const visit = node => {\n    if (!node || typeof node !== 'object') return;\n    if (Array.isArray(node)) { node.forEach(visit); return; }\n    for (const [k, v] of Object.entries(node)) {\n      if (!v || typeof v !== 'object') continue;\n      switch (k) {\n        case 'videoRenderer': case 'gridVideoRenderer': case 'compactVideoRenderer': add(fromVideoRenderer(v)); break;\n        case 'playlistVideoRenderer': add(fromPlaylistVideo(v)); break;\n        case 'reelItemRenderer': add(fromReel(v)); break;\n        case 'shortsLockupViewModel': add(fromShortsLockup(v)); break;\n        case 'lockupViewModel': add(fromLockup(v)); break;\n        case 'continuationItemRenderer': {\n          const t = v.continuationEndpoint?.continuationCommand?.token;\n          if (t) state.token = t;\n          break;\n        }\n        case 'channelMetadataRenderer':\n          if (v.title) state.channel = { id: v.externalId || '', title: String(v.title) };\n          break;\n        default: visit(v);\n      }\n    }\n  };\n  visit(data);\n  return { videos: [...videos.values()], token: state.token, channel: state.channel };\n}\n\n/* ---------- данные со страницы ---------- */\n\nexport function extractJson(html, name) {\n  const re = new RegExp(name + '[\"\\\\]]*\\\\s*=\\\\s*\\\\{');\n  const m = re.exec(html);\n  if (!m) return null;\n  const start = m.index + m[0].length - 1;\n  let depth = 0, inStr = false, esc = false;\n  for (let i = start; i < html.length; i++) {\n    const c = html[i];\n    if (inStr) {\n      if (esc) esc = false;\n      else if (c === '\\\\') esc = true;\n      else if (c === '\"') inStr = false;\n    } else if (c === '\"') inStr = true;\n    else if (c === '{') depth++;\n    else if (c === '}' && --depth === 0) {\n      try { return JSON.parse(html.slice(start, i + 1)); } catch { return null; }\n    }\n  }\n  return null;\n}\n\nexport function getCfg(html) {\n  const key = (html.match(/\"INNERTUBE_API_KEY\":\"([^\"]+)\"/) || [])[1] || '';\n  const version = (html.match(/\"INNERTUBE_CLIENT_VERSION\":\"([^\"]+)\"/) || [])[1] || '2.20250101.00.00';\n  const visitorData = (html.match(/\"visitorData\":\"([^\"]+)\"/) || [])[1] || '';\n  return { key, version, context: { client: { clientName: 'WEB', clientVersion: version, hl: 'en', gl: 'US', visitorData } } };\n}\n\n/* ---------- что именно парсим ---------- */\n\nexport function buildTarget(query, tab = 'videos') {\n  const q = String(query || '').trim();\n  if (!q) throw new Error('Вставь ссылку на канал, плейлист, поиск или видео, либо просто запрос.');\n  if (/^@[\\w.\\-]+$/.test(q)) return { mode: 'channel', url: `https://www.youtube.com/${q}/${tab}`, label: q };\n  if (/^https?:\\/\\//i.test(q)) {\n    let u;\n    try { u = new URL(q); } catch { throw new Error('Не получилось разобрать ссылку.'); }\n    const host = u.hostname.replace(/^(www|m)\\./, '');\n    if (host === 'youtu.be') return { mode: 'video', id: u.pathname.slice(1, 12) };\n    if (host !== 'youtube.com' && host !== 'music.youtube.com') throw new Error('Поддерживаются только ссылки на YouTube.');\n    if (u.pathname === '/results') {\n      const label = u.searchParams.get('search_query');\n      if (!label) throw new Error('В ссылке поиска нет текста запроса.');\n      return { mode: 'search', url: `https://www.youtube.com/results?${u.searchParams.toString()}`, label };\n    }\n    if (u.pathname === '/watch' && u.searchParams.get('v')) return { mode: 'video', id: u.searchParams.get('v') };\n    if (u.pathname.startsWith('/shorts/')) return { mode: 'video', id: u.pathname.split('/')[2] };\n    if (u.pathname === '/playlist' && u.searchParams.get('list'))\n      return { mode: 'playlist', url: `https://www.youtube.com/playlist?list=${encodeURIComponent(u.searchParams.get('list'))}`, label: 'плейлист' };\n    const cm = u.pathname.match(/^\\/(@[^/]+|channel\\/[^/]+|c\\/[^/]+|user\\/[^/]+)/);\n    if (cm) return { mode: 'channel', url: `https://www.youtube.com/${cm[1]}/${tab}`, label: cm[1] };\n    throw new Error('Не понял ссылку. Нужна ссылка на канал, плейлист, поиск или видео.');\n  }\n  return { mode: 'search', url: `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, label: q };\n}\n\n/* ---------- сеть ---------- */\n\nlet lastRequest = 0;\nasync function throttle(ms = 350) {\n  const wait = lastRequest + ms - Date.now();\n  if (wait > 0) await sleep(wait);\n  lastRequest = Date.now();\n}\n\nasync function request(url, init, tries = 3) {\n  for (let i = 0; i < tries; i++) {\n    await throttle();\n    const r = await fetch(url, { credentials: 'include', ...init });\n    if (r.status === 429 || r.status >= 500) { await sleep(3000 * (i + 1)); continue; }\n    if (!r.ok) throw new Error(`YouTube ответил ${r.status}`);\n    if (String(r.url).includes('consent.')) throw new Error('YouTube просит принять cookies. Открой youtube.com, согласись и повтори.');\n    return r;\n  }\n  throw new Error('YouTube не отвечает: слишком много запросов. Подожди несколько минут и повтори.');\n}\n\nexport async function fetchText(url) {\n  return (await request(url)).text();\n}\n\nexport async function fetchBrowse(cfg, endpoint, token) {\n  const r = await request(`https://www.youtube.com/youtubei/v1/${endpoint}?key=${encodeURIComponent(cfg.key)}&prettyPrint=false`, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json', 'X-Youtube-Client-Name': '1', 'X-Youtube-Client-Version': cfg.version },\n    body: JSON.stringify({ context: cfg.context, continuation: token }),\n  });\n  return r.json();\n}\n\n// Полные данные об одном видео: точные просмотры, дата, длительность, канал.\nexport async function fetchDetails(id) {\n  const html = await fetchText(withLang(`https://www.youtube.com/watch?v=${encodeURIComponent(id)}`));\n  const pr = extractJson(html, 'ytInitialPlayerResponse');\n  return detailsFromPlayer(pr, id);\n}\n\nexport function detailsFromPlayer(pr, id) {\n  const vd = pr?.videoDetails;\n  if (!vd) throw new Error('Видео недоступно или YouTube не отдал данные.');\n  const mf = pr.microformat?.playerMicroformatRenderer || {};\n  const views = Number(vd.viewCount), secs = Number(vd.lengthSeconds);\n  return compact({\n    id: vd.videoId || id,\n    title: vd.title || '',\n    channel: vd.author || mf.ownerChannelName || '',\n    channel_id: vd.channelId || mf.externalChannelId || '',\n    views: Number.isFinite(views) ? views : undefined,\n    duration: Number.isFinite(secs) ? secs : undefined,\n    date: String(mf.publishDate || mf.uploadDate || '').slice(0, 10) || undefined,\n  });\n}\n", "youtube.js": "// youtube.js — работает на страницах youtube.com: кнопки «Сохранить» и «В каталог».\n// Страницу YouTube не переделываем: одна плавающая панель появляется над обложкой под курсором,\n// а на странице видео есть постоянная кнопка в углу. Из страницы берём только ID видео,\n// остальное (название, просмотры, дату, канал) расширение уточняет само.\n\n(() => {\n  if (window.__ccInjected) return;\n  window.__ccInjected = true;\n\n  const css = `\n  #cc-pop{position:fixed;z-index:2147483646;display:none;gap:4px;padding:3px;border-radius:7px;background:rgba(18,18,20,.92);box-shadow:0 2px 10px rgba(0,0,0,.5)}\n  #cc-pop button,#cc-pill button{all:unset;cursor:pointer;font:600 12px/1 system-ui,Segoe UI,Arial,sans-serif;color:#fff;padding:7px 10px;border-radius:5px;white-space:nowrap}\n  #cc-pop button:hover,#cc-pill button:hover{background:#f2c94c;color:#1d1700}\n  #cc-pill{position:fixed;z-index:2147483646;right:18px;bottom:18px;display:none;gap:4px;padding:4px;border-radius:9px;background:rgba(18,18,20,.94);box-shadow:0 4px 18px rgba(0,0,0,.55)}\n  #cc-toast{position:fixed;z-index:2147483647;left:50%;bottom:28px;transform:translateX(-50%);background:#ebe8e2;color:#1c1d20;font:600 13px/1.3 system-ui,Segoe UI,Arial,sans-serif;padding:9px 16px;border-radius:8px;display:none;max-width:80vw}\n  `;\n  const style = document.createElement('style');\n  style.textContent = css;\n  document.documentElement.appendChild(style);\n\n  const mk = (tag, id, html) => { const e = document.createElement(tag); if (id) e.id = id; if (html) e.innerHTML = html; return e; };\n  const BTN = '<button type=\"button\" data-op=\"save\" title=\"Сохранить в каталог\">★ Сохранить<\/button><button type=\"button\" data-op=\"add\" title=\"Добавить в каталог без пометки\">＋ В каталог<\/button>';\n  const pop = mk('div', 'cc-pop', BTN);\n  const pill = mk('div', 'cc-pill', BTN);\n  const toast = mk('div', 'cc-toast');\n  document.documentElement.append(pop, pill, toast);\n\n  let toastTimer;\n  const say = msg => { toast.textContent = msg; toast.style.display = 'block'; clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.style.display = 'none', 2600); };\n\n  const idFrom = href => {\n    try {\n      const u = new URL(href, location.href);\n      if (u.pathname === '/watch') return { id: u.searchParams.get('v'), kind: 'video' };\n      if (u.pathname.startsWith('/shorts/')) return { id: u.pathname.split('/')[2], kind: 'short' };\n    } catch (e) { /* не ссылка */ }\n    return null;\n  };\n  const valid = x => x && /^[\\w-]{11}$/.test(x.id || '');\n\n  function send(item, op) {\n    if (!valid(item)) return say('Не удалось определить видео.');\n    try {\n      chrome.runtime.sendMessage({ type: 'save', op, items: [item] }, res => {\n        if (chrome.runtime.lastError || !res || !res.ok) return say('Не получилось сохранить: ' + ((res && res.error) || 'расширение не отвечает'));\n        say(op === 'save' ? '★ Сохранено. Появится в каталоге, когда он будет открыт.' : 'Добавлено в каталог.');\n      });\n      say('Сохраняю…');\n    } catch (e) { say('Расширение было обновлено. Обнови страницу (F5).'); }\n  }\n\n  /* --- панель над обложкой --- */\n  let current = null, hideTimer;\n  const hidePop = () => { pop.style.display = 'none'; current = null; };\n\n  document.addEventListener('mouseover', e => {\n    if (pop.contains(e.target)) { clearTimeout(hideTimer); return; }\n    const a = e.target.closest && e.target.closest('a[href*=\"/watch?v=\"], a[href*=\"/shorts/\"]');\n    if (!a) return;\n    const item = idFrom(a.href);\n    if (!valid(item)) return;\n    const r = a.getBoundingClientRect();\n    if (r.width < 110 || r.height < 60) return; // это текстовая ссылка, а не обложка\n    clearTimeout(hideTimer);\n    const title = a.getAttribute('title') || a.closest('ytd-rich-item-renderer,ytd-video-renderer,ytd-compact-video-renderer,ytd-grid-video-renderer,yt-lockup-view-model')?.querySelector('#video-title,h3')?.textContent?.trim() || '';\n    current = { ...item, title: title.slice(0, 200) };\n    pop.style.display = 'flex';\n    pop.style.left = Math.max(4, r.left + 6) + 'px';\n    pop.style.top = Math.max(4, r.top + 6) + 'px';\n  }, true);\n  document.addEventListener('mouseout', e => {\n    if (!current) return;\n    const to = e.relatedTarget;\n    if (to && (pop.contains(to) || (to.closest && to.closest('a[href*=\"/watch?v=\"], a[href*=\"/shorts/\"]')))) return;\n    clearTimeout(hideTimer);\n    hideTimer = setTimeout(hidePop, 150);\n  }, true);\n  window.addEventListener('scroll', hidePop, { passive: true, capture: true });\n  pop.addEventListener('click', e => {\n    const op = e.target.dataset && e.target.dataset.op;\n    if (op && current) { e.preventDefault(); e.stopPropagation(); send(current, op); }\n  });\n\n  /* --- кнопка на странице видео --- */\n  function pageItem() {\n    if (location.pathname === '/watch') return { id: new URLSearchParams(location.search).get('v'), kind: 'video' };\n    if (location.pathname.startsWith('/shorts/')) return { id: location.pathname.split('/')[2], kind: 'short' };\n    return null;\n  }\n  const syncPill = () => { pill.style.display = valid(pageItem()) ? 'flex' : 'none'; };\n  pill.addEventListener('click', e => {\n    const op = e.target.dataset && e.target.dataset.op;\n    if (!op) return;\n    const item = pageItem();\n    if (valid(item)) send({ ...item, title: (document.title || '').replace(/ - YouTube$/, '') }, op);\n  });\n  document.addEventListener('yt-navigate-finish', syncPill);\n  setInterval(syncPill, 1000);\n  syncPill();\n})();\n", "bridge.js": "// bridge.js — мост между страницей каталога и расширением. Работает только на адресе сайта.\n// Страница и расширение обмениваются сообщениями через window.postMessage,\n// а очередь и состояние задачи лежат в chrome.storage.local.\n\n(() => {\n  const VERSION = chrome.runtime.getManifest().version;\n  const toPage = msg => window.postMessage({ cc: 'ext', ...msg }, '*');\n  const store = chrome.storage.local;\n  let timer;\n\n  async function flush() {\n    const all = await store.get(null);\n    const items = Object.entries(all).filter(([k]) => k.startsWith('ob:')).map(([, v]) => v);\n    if (items.length) toPage({ type: 'items', items });\n  }\n  async function sendJob() {\n    const { job } = await store.get('job');\n    if (job) toPage({ type: 'job', job });\n  }\n\n  window.addEventListener('message', async e => {\n    if (e.source !== window || !e.data || e.data.cc !== 'site') return;\n    const m = e.data;\n    try {\n      if (m.type === 'hello') {\n        toPage({ type: 'ready', version: VERSION });\n        chrome.runtime.sendMessage({ type: 'site-url', url: location.origin + location.pathname.replace(/[^/]*$/, '') });\n        await flush();\n        await sendJob();\n      } else if (m.type === 'ack' && Array.isArray(m.ids)) {\n        await store.remove(m.ids.filter(id => typeof id === 'string').map(id => 'ob:' + id));\n      } else if (m.type === 'import') {\n        chrome.runtime.sendMessage({ type: 'import', params: m.params });\n      } else if (m.type === 'cancel') {\n        chrome.runtime.sendMessage({ type: 'cancel' });\n      }\n    } catch (err) {\n      toPage({ type: 'error', error: String(err && err.message || err) });\n    }\n  });\n\n  chrome.storage.onChanged.addListener((changes, area) => {\n    if (area !== 'local') return;\n    if (changes.job) sendJob();\n    if (Object.keys(changes).some(k => k.startsWith('ob:') && changes[k].newValue)) {\n      clearTimeout(timer);\n      timer = setTimeout(flush, 200);\n    }\n  });\n\n  toPage({ type: 'ready', version: VERSION });\n})();\n", "popup.html": "<!doctype html>\n<html lang=\"ru\">\n<head>\n<meta charset=\"utf-8\">\n<style>\n  body{margin:0;width:300px;font:14px/1.4 system-ui,'Segoe UI',Arial,sans-serif;background:#1c1d20;color:#ebe8e2}\n  main{padding:14px 16px}\n  h1{font-size:15px;margin:0 0 10px}\n  p{margin:6px 0;color:#9b9a96}\n  b{color:#ebe8e2;font-weight:600}\n  button{font:inherit;cursor:pointer;border:1px solid #383a40;background:#2b2d32;color:#ebe8e2;border-radius:6px;padding:7px 12px;margin:6px 6px 0 0}\n  button.primary{background:#f2c94c;border-color:#f2c94c;color:#1d1700;font-weight:700}\n<\/style>\n<\/head>\n<body>\n<main>\n  <h1>Каталог обложек<\/h1>\n  <p>Ждут передачи в каталог: <b id=\"queue\">0<\/b><\/p>\n  <p id=\"job\"><\/p>\n  <button class=\"primary\" id=\"open\">Открыть каталог<\/button>\n  <button id=\"clear\" title=\"Удалить из очереди то, что ещё не попало в каталог\">Очистить очередь<\/button>\n  <p style=\"margin-top:12px\">Наведи курсор на обложку на YouTube и нажми «Сохранить». Ссылки на каналы и поиск вставляются в самом каталоге.<\/p>\n<\/main>\n<script src=\"popup.js\"><\/script>\n<\/body>\n<\/html>\n", "popup.js": "const $ = id => document.getElementById(id);\n\nasync function render() {\n  const all = await chrome.storage.local.get(null);\n  $('queue').textContent = Object.keys(all).filter(k => k.startsWith('ob:')).length;\n  const job = all.job;\n  $('job').textContent = !job ? '' : job.running ? `Импорт идёт: ${job.done}/${job.total || '…'}` : job.error ? `Последний импорт: ошибка (${job.error})` : 'Последний импорт завершён.';\n}\n\n$('open').onclick = async () => {\n  let url = (await chrome.storage.local.get('siteUrl')).siteUrl;\n  if (!url) { try { url = (await (await fetch(chrome.runtime.getURL('config.json'))).json()).siteUrl; } catch (e) { /* нет конфига */ } }\n  if (url) chrome.tabs.create({ url });\n  else $('job').textContent = 'Адрес каталога неизвестен. Открой страницу каталога один раз вручную.';\n};\n$('clear').onclick = async () => {\n  const all = await chrome.storage.local.get(null);\n  await chrome.storage.local.remove(Object.keys(all).filter(k => k.startsWith('ob:')));\n  render();\n};\n\nrender();\nchrome.storage.onChanged.addListener(render);\n"};
+const README = [
+  'Каталог обложек: расширение для браузера',
+  '',
+  'Установка (Chrome, Edge, Yandex Browser, Opera и другие на Chromium):',
+  '1. Распакуй этот архив в постоянную папку. Потом её нельзя удалять и переносить.',
+  '2. Открой chrome://extensions (в Edge: edge://extensions).',
+  '3. Включи «Режим разработчика».',
+  '4. Нажми «Загрузить распакованное» и выбери папку, где лежит файл manifest.json.',
+  '5. Обнови страницу каталога (F5). Строка «Расширение подключено» подтвердит, что всё работает.',
+  '',
+  'Как пользоваться:',
+  '- В каталоге нажми «Добавить обложки» и вставь ссылку на канал, плейлист, поиск YouTube или видео.',
+  '- На YouTube наведи курсор на обложку и нажми «Сохранить». На странице видео такая же кнопка внизу справа.',
+  '',
+  'Расширение обращается только к youtube.com и к странице твоего каталога. Данные остаются в твоём браузере.',
+].join('\r\n');
+
+const crcTable = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+  return t;
+})();
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = crcTable[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function makeZip(files) {
+  const enc = new TextEncoder(), chunks = [], central = [];
+  const now = new Date();
+  const time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name), crc = crc32(f.data), size = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, time, true); lh.setUint16(12, date, true); lh.setUint32(14, crc, true);
+    lh.setUint32(18, size, true); lh.setUint32(22, size, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(lh.buffer), name, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, time, true); ch.setUint16(14, date, true); ch.setUint32(16, crc, true);
+    ch.setUint32(20, size, true); ch.setUint32(24, size, true); ch.setUint16(28, name.length, true);
+    ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + size;
+  }
+  const cdSize = central.reduce((n, c) => n + c.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+}
+function siteMatches() {
+  const list = [];
+  if (/^https?:$/.test(location.protocol)) list.push(location.origin + '/*');
+  list.push('http://localhost/*', 'http://127.0.0.1/*');
+  return [...new Set(list)];
+}
+function buildExtensionZip() {
+  const enc = new TextEncoder(), files = [];
+  for (const [name, content] of Object.entries(EXT_FILES)) {
+    let body = content;
+    if (name === 'manifest.json') { const m = JSON.parse(content); m.content_scripts[1].matches = siteMatches(); body = JSON.stringify(m, null, 2); }
+    files.push({ name, data: enc.encode(body) });
+  }
+  const here = /^https?:$/.test(location.protocol) ? location.origin + location.pathname.replace(/[^/]*$/, '') : '';
+  files.push({ name: 'config.json', data: enc.encode(JSON.stringify({ siteUrl: here })) });
+  files.push({ name: 'README.txt', data: enc.encode(README) });
+  return makeZip(files);
+}
+function download(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('[data-dl-ext]')) return;
+  if (!Object.keys(EXT_FILES).length) { toast('В этой сборке нет файлов расширения.'); return; }
+  download(buildExtensionZip(), 'cover-catalog-extension.zip');
+  toast('Архив скачан. Дальше следуй шагам в окне.');
+});
+
+/* ---------- база: скачать, загрузить, очистить ---------- */
+const lastExport = () => { try { return localStorage.getItem('cc-last-export') || ''; } catch (e) { return ''; } };
+function fmtAgo(iso) {
+  const d = Math.floor((Date.now() - new Date(iso)) / 86400000);
+  return d <= 0 ? 'сегодня' : d === 1 ? 'вчера' : `${d} дн. назад`;
+}
+function renderBackup() {
+  const iso = lastExport();
+  const stale = LIB.length > 0 && (!iso || Date.now() - new Date(iso) > 7 * 86400000);
+  const t = iso ? `Последняя копия: ${fmtAgo(iso)}` : 'Копию базы ещё не скачивали';
+  const line = $('#backupLine');
+  line.textContent = LIB.length ? t : '';
+  line.classList.toggle('warn', stale);
+  $('#backupInfo').textContent = t + '. База хранится только в этом браузере, поэтому время от времени скачивай копию.';
+}
+function exportJSON(list, all) {
+  const data = { app: 'cover-catalog', version: 1, exported_at: new Date().toISOString(), videos: list.map(strip) };
+  download(new Blob([JSON.stringify(data)], { type: 'application/json' }), `library-${new Date().toISOString().slice(0, 10)}${all ? '' : '-selection'}.json`);
+  if (all) { try { localStorage.setItem('cc-last-export', new Date().toISOString()); } catch (e) { /* ничего */ } renderBackup(); }
+}
+let pendingImport = null;
+function fileMsg(msg) { pendingImport = null; $('#impChoice').hidden = false; $('#impSummary').textContent = msg; $('#doMerge').hidden = true; $('#doReplace').hidden = true; }
+async function readImportFile(file) {
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (e) { return fileMsg('Это не файл базы: не получилось прочитать JSON. Нужен library.json.'); }
+  const list = Array.isArray(data) ? data : Array.isArray(data?.videos) ? data.videos : (data && typeof data.videos === 'object' && data.videos) ? Object.values(data.videos) : null;
+  if (!list) return fileMsg('В файле не нашёл список обложек.');
+  const map = new Map();
+  list.map(cleanRecord).filter(Boolean).forEach(r => map.set(r.id, r));
+  if (!map.size) return fileMsg('В файле нет ни одной подходящей записи.');
+  pendingImport = [...map.values()];
+  const fresh = pendingImport.filter(r => !BY_ID.has(r.id)).length;
+  $('#impSummary').textContent = `В файле обложек: ${pendingImport.length}. Новых для твоей базы: ${fresh}, уже есть: ${pendingImport.length - fresh}.`;
+  $('#impChoice').hidden = false; $('#doMerge').hidden = false; $('#doReplace').hidden = !LIB.length;
+}
+function finishImport(msg) {
+  pendingImport = null; $('#impChoice').hidden = true; $('#fileInput').value = '';
+  prepare(); refresh(); renderBackup(); toast(msg);
+  try { navigator.storage?.persist?.(); } catch (e) { /* ничего */ }
+}
+$('#doMerge').onclick = async () => {
+  if (!pendingImport) return;
+  const changed = []; let added = 0;
+  for (const inc of pendingImport) {
+    const v = BY_ID.get(inc.id);
+    if (!v) { LIB.push(inc); BY_ID.set(inc.id, inc); touch(inc); changed.push(inc); added++; }
+    else { mergeFileRecord(v, inc); touch(v); changed.push(v); }
+  }
+  await DB.putMany(changed);
+  finishImport(`Объединено. Новых обложек: ${added}.`);
+};
+$('#doReplace').onclick = async () => {
+  if (!pendingImport) return;
+  if (!confirm('Заменить всю текущую базу данными из файла? Текущие обложки, теги и заметки будут удалены. Сначала лучше скачать копию.')) return;
+  await DB.clear();
+  LIB = []; BY_ID.clear();
+  pendingImport.forEach(r => { LIB.push(r); BY_ID.set(r.id, r); touch(r); });
+  await DB.putMany(LIB);
+  finishImport(`База заменена. Обложек: ${LIB.length}.`);
+};
+$('#doCancel').onclick = () => { pendingImport = null; $('#impChoice').hidden = true; $('#fileInput').value = ''; };
+function openBase() {
+  const hid = LIB.filter(v => v.hidden).length;
+  $('#baseInfo').textContent = LIB.length ? `Обложек в базе: ${LIB.length}${hid ? `, из них скрытых: ${hid}` : ''}.` : 'База пока пуста.';
+  $('#expSel').textContent = `Скачать текущую выборку (${filtered.length})`;
+  $('#expSel').disabled = !filtered.length; $('#expAll').disabled = !LIB.length; $('#wipe').disabled = !LIB.length;
+  renderBackup();
+  if (!$('#baseDlg').open) $('#baseDlg').showModal();
+}
+$('#baseBtn').onclick = openBase;
+$('#baseClose').onclick = () => $('#baseDlg').close();
+$('#expAll').onclick = () => exportJSON(LIB, true);
+$('#expSel').onclick = () => exportJSON(filtered, false);
+$('#pickFile').onclick = () => $('#fileInput').click();
+$('#fileInput').addEventListener('change', e => { const f = e.target.files[0]; if (f) readImportFile(f); });
+$('#wipe').onclick = async () => {
+  if (!confirm(`Удалить все обложки из базы (${LIB.length})? Это нельзя отменить. Если нужна копия, сначала скачай базу.`)) return;
+  await DB.clear(); LIB = []; BY_ID.clear();
+  prepare(); refresh(); renderBackup(); openBase(); toast('База очищена');
+};
+// файл можно бросить в любое место страницы
+window.addEventListener('dragover', e => { e.preventDefault(); $('#drop').classList.add('over'); });
+window.addEventListener('dragleave', e => { if (!e.relatedTarget) $('#drop').classList.remove('over'); });
+window.addEventListener('drop', e => {
+  e.preventDefault(); $('#drop').classList.remove('over');
+  const f = e.dataTransfer?.files?.[0];
+  if (f) { openBase(); readImportFile(f); }
+});
+
+/* ---------- горячие клавиши ---------- */
+document.addEventListener('keydown', e => {
+  const typing = e.target.matches('input,textarea,select');
+  if (e.key === '/' && !typing && !document.querySelector('dialog[open]')) { e.preventDefault(); $('#q').focus(); }
+  if (e.key === 'Escape' && !typing && !document.querySelector('dialog[open]') && selected.size) { selected.clear(); syncSelection(); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a' && !typing && !document.querySelector('dialog[open]')) { e.preventDefault(); filtered.forEach(v => selected.add(v.id)); syncSelection(); }
+});
+
+loadPref();
+(async () => {
+  try { await DB.open(); } catch (e) { $('#storageWarn').hidden = false; }
+  await loadLibrary();
+  updateExtUI();
+  toExt({ type: 'hello' });
+  setTimeout(() => toExt({ type: 'hello' }), 1500);
+  try { navigator.storage?.persist?.(); } catch (e) { /* ничего */ }
+})();
+</script>
+</body>
+</html>
